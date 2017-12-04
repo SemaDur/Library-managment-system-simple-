@@ -24,6 +24,18 @@ if(isset($_POST['RESERVE'])){
 		$reserved = "You reserved: ".$search_name;
 	}
 }
+
+if(isset($_POST['RETURN'])){
+    $search_name = $_POST['IDBOOK'];
+	$update = "UPDATE books SET user_id = 0 WHERE book_name = '$search_name'";
+	$exec = mysqli_query($connect, $update) or die('Error executing query');
+	if (!$exec) {
+		echo "Could not successfully run query from DB: " . mysql_error();
+		exit;
+	} else {
+		$reserved = "You reserved: ".$search_name;
+	}
+}
 	
 
   
@@ -97,7 +109,7 @@ if(isset($_POST['RESERVE'])){
                                 <td>
                                     
                                     <?php 
-                                        $result = mysqli_query($connect,  "SELECT id, book_name FROM books" );
+                                        $result = mysqli_query($connect,  "SELECT id, book_name FROM books WHERE user_id = 0" );
                                         if (!$result) {
                                                 echo "Could not successfully run query from DB: " . mysql_error();
                                                 exit;
@@ -112,6 +124,37 @@ if(isset($_POST['RESERVE'])){
                                     
                                 </td>
 								<td><input type="submit" value="Reserve" name="RESERVE" /></td>
+                            </tr>
+                            </form>
+							<tr>
+								<td><?php echo $reserved; ?></td>
+							</tr>
+						</table>
+
+						<table>
+						  <tr>
+								<td>Return Book</td>
+						  </tr>
+						  <tr>
+                            <form method="post"  action="">
+                                <td>
+                                    
+                                    <?php 
+                                        $result = mysqli_query($connect,  "SELECT id, book_name FROM books WHERE user_id = '$id'" );
+                                        if (!$result) {
+                                                echo "Could not successfully run query from DB: " . mysql_error();
+                                                exit;
+                                        }
+                                        echo "<select name='IDBOOK'>";
+                                        while ($raw = mysqli_fetch_assoc($result)) {
+                                            echo "<option value='".$raw["book_name"]."'>" . $raw["book_name"]."</option>";
+                                        } 
+                                        echo "</select>";
+                                    
+                                    ?>
+                                    
+                                </td>
+								<td><input type="submit" value="Return" name="RETURN" /></td>
                             </tr>
                             </form>
 							<tr>
