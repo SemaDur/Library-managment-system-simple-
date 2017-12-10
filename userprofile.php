@@ -4,8 +4,7 @@ include('session.php');
 $user = $_SESSION['user'];
 $id = $_SESSION['id'];
 
-
-$result = mysqli_query($connect,  "SELECT book_name, book_writer, user_id FROM books" );
+$result = $book->selectAll();
 if (!$result) {
         echo "Could not successfully run query from DB: " . mysql_error();
         exit;
@@ -15,10 +14,10 @@ $reserved = '';
 
 if(isset($_POST['RESERVE'])){
     $search_name = $_POST['IDBOOK'];
-	$update = "UPDATE books SET user_id = $id WHERE book_name = '$search_name'";
-	$exec = mysqli_query($connect, $update) or die('Error executing query');
-	if (!$exec) {
-		echo "Could not successfully run query from DB: " . mysql_error();
+	$exec = $book->reserveBook($id, $search_name);
+
+	if (is_string($exec)){
+		echo "Could not successfully run query from DB. ".$exec ;
 		exit;
 	} else {
 		$reserved = "You reserved: ".$search_name;
@@ -27,13 +26,14 @@ if(isset($_POST['RESERVE'])){
 
 if(isset($_POST['RETURN'])){
     $search_name = $_POST['IDBOOK'];
-	$update = "UPDATE books SET user_id = 0 WHERE book_name = '$search_name'";
-	$exec = mysqli_query($connect, $update) or die('Error executing query');
-	if (!$exec) {
-		echo "Could not successfully run query from DB: " . mysql_error();
+	//$update = "UPDATE books SET user_id = 0 WHERE book_name = '$search_name'";
+    $exec = $book->reserveBook(0, $search_name);
+
+	if (is_string($exec)){
+		echo "Could not successfully run query from DB: " .$exec;
 		exit;
 	} else {
-		$reserved = "You reserved: ".$search_name;
+		$reserved = "You put back: ".$search_name;
 	}
 }
 	
@@ -109,13 +109,13 @@ if(isset($_POST['RETURN'])){
                                 <td>
                                     
                                     <?php 
-                                        $result = mysqli_query($connect,  "SELECT id, book_name FROM books WHERE user_id = 0" );
-                                        if (!$result) {
-                                                echo "Could not successfully run query from DB: " . mysql_error();
+                                        $searchByUser = $book->selectBookByUser(0);
+                                        if (!$searchByUser) {
+                                                echo "Could not successfully run query from DB:";
                                                 exit;
                                         }
                                         echo "<select name='IDBOOK'>";
-                                        while ($raw = mysqli_fetch_assoc($result)) {
+                                        while ($raw = mysqli_fetch_assoc($searchByUser)) {
                                             echo "<option value='".$raw["book_name"]."'>" . $raw["book_name"]."</option>";
                                         } 
                                         echo "</select>";
@@ -139,14 +139,14 @@ if(isset($_POST['RETURN'])){
                             <form method="post"  action="">
                                 <td>
                                     
-                                    <?php 
-                                        $result = mysqli_query($connect,  "SELECT id, book_name FROM books WHERE user_id = '$id'" );
-                                        if (!$result) {
-                                                echo "Could not successfully run query from DB: " . mysql_error();
-                                                exit;
+                                    <?php
+                                        $searchByUser = $book->selectBookByUser($id);
+                                        if (!$searchByUser) {
+                                            echo "Could not successfully run query from DB:";
+                                            exit;
                                         }
                                         echo "<select name='IDBOOK'>";
-                                        while ($raw = mysqli_fetch_assoc($result)) {
+                                        while ($raw = mysqli_fetch_assoc($searchByUser)) {
                                             echo "<option value='".$raw["book_name"]."'>" . $raw["book_name"]."</option>";
                                         } 
                                         echo "</select>";

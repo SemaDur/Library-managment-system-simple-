@@ -1,17 +1,19 @@
 <?php 
-include('connect.php');
+include('classes\connect.php');
+include('classes\user.php');
 
 
 $error='';
 $db = DBConnection::getInstance();
-
+$connect = $db->getConnection();
+$user = new User($connect);
 
 if(isset($_POST['confirm']) && !(empty($_POST['name'])) && !(empty($_POST['lastname'])) && !(empty($_POST['email'])) && !(empty($_POST['password']))) {
     $fname = $_POST['name'];
     $lname = $_POST['lastname'];
     $email = $_POST['email'];
     $pass = $_POST['password'];
-    $res = $db->regist($fname, $lname, $email, $pass);
+    $res = $user->regist($fname, $lname, $email, $pass);
     if(is_string($res)){
         $error = $res;
     }

@@ -1,25 +1,23 @@
 <?php
 
 include('session.php');
-$user = $_SESSION['user'];
+$username = $_SESSION['user'];
 $deleted = '';
 $updated = '';
 
 if (isset($_POST['ADDBOOK']) && !(empty($_POST['BOOKNAME'])) && !(empty($_POST['WRITERNAME']))){
 		$bname = $_POST['BOOKNAME'];
 		$bwriter = $_POST['WRITERNAME'];
-		$query = "INSERT INTO books(book_name, book_writer) VALUES ('$bname','$bwriter')";
-		$res = $db->insertBook($query);
+		$res = $book->insertBook($bname, $bwriter);
 }
 
 if(isset($_POST['Remove']) && !(empty($_POST['REMBOOKNAME']))){
 	
 	$search_name = $_POST['REMBOOKNAME'];
-	$delete = "DELETE FROM books WHERE book_name = '$search_name'";
-	$exec = mysqli_query($connect, $delete) or die('Error executing query');
+	$exec = $book->deleteBook($search_name);
 	if (!$exec) {
-		echo "Could not successfully run query from DB: " . mysql_error();
-		exit;
+		echo "Could not successfully run query from DB. ";
+
 	}	else {
 		$deleted = "Book: ".$search_name." removed";
 	}
@@ -29,11 +27,10 @@ if(isset($_POST['SETROLE']) && !(empty($_POST['SETUSER']))){
 	
 	$search_name = $_POST['SETUSER'];
 	$role = $_POST['ROLESELECT'];
-	$update = "UPDATE users SET role = '$role' WHERE email = '$search_name'";
-	$exec = mysqli_query($connect, $update) or die('Error executing query');
+	$exec = $user->updateUser($role, $search_name);
 	if (!$exec) {
-		echo "Could not successfully run query from DB: " . mysql_error();
-		exit;
+		echo "Could not successfully run query from DB.";
+
 	}	else {
 		$updated = "User: ".$search_name." promoted to: ".$role;
 	}
@@ -53,7 +50,7 @@ if(isset($_POST['SETROLE']) && !(empty($_POST['SETUSER']))){
 </head>
 
 <body>
-    <b style="font-size:16px;">Welcome : <span style="font-size:16px;" ><?php echo $user; ?></span></b><br><hr />
+    <b style="font-size:16px;">Welcome : <span style="font-size:16px;" ><?php echo $username; ?></span></b><br><hr />
 
     <div id="topbar">
     <a  href="logout.php"  style="float: right;margin-right:30px;">Log Out</a>
@@ -95,26 +92,26 @@ if(isset($_POST['SETROLE']) && !(empty($_POST['SETUSER']))){
 							<tr>
 								<th>Book Name</th><th>Writer</th>
 							</tr>
-                  <?php
+                            <?php
 
-										$result = mysqli_query($connect,  "SELECT book_name, book_writer FROM books" );
-										if (!$result) {
-											echo "Could not successfully run query from DB: " . mysql_error();
-											exit;
-										}
-										if (!mysqli_num_rows($result)) {
-											echo "No rows found";
-										}	else{
-												while ($row = mysqli_fetch_assoc($result)) {
-												$a= $row["book_name"];
-												$b= $row["book_writer"];
+                            $result = $book->selectAll();
+                            if (is_string($result)) {
+                                echo "Could not successfully run query from DB.";
+							    exit;
+                            }
+                            if (!mysqli_num_rows($result)) {
+							    echo "No rows found";
+						    } else {
+						        while ($row = mysqli_fetch_assoc($result)) {
+							    $a= $row["book_name"];
+							    $b= $row["book_writer"];
 	
-												echo " <tr onmouseover=\"this.style.backgroundColor='#ffff66';\" onmouseout=\"this.style.backgroundColor='#d4e3e5';\"> ";
-												echo "<td>$a</td>";
-												echo "<td>$b</td>";
-												echo "</tr>";
-												}
-										}
+							    echo " <tr onmouseover=\"this.style.backgroundColor='#ffff66';\" onmouseout=\"this.style.backgroundColor='#d4e3e5';\"> ";
+							    echo "<td>$a</td>";
+							    echo "<td>$b</td>";
+							    echo "</tr>";
+						        }
+						    }
 
 						    ?>
 						</table>
@@ -150,12 +147,12 @@ if(isset($_POST['SETROLE']) && !(empty($_POST['SETUSER']))){
 							<th>Name</th><th>Lastname</th><th>Email</th><th>Type</th>
 					</tr>
 					<?php
-				
-						$result = mysqli_query($connect,  "SELECT name, lastname, email, role FROM users" );
-						if (!$result) {
-							echo "Could not successfully run query from DB: " . mysql_error();
-							exit;
-							}
+
+                        $result = $user->selectAll();
+                        if (is_string($result)) {
+                            echo "Could not successfully run query from DB.";
+                            exit;
+                        }
 						if (!mysqli_num_rows($result)) {
 							echo "No rows found";
 						}	else {
